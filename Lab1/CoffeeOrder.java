@@ -2,7 +2,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 // Demonstrates SRP: this class is only responsible for representing a coffee order.
-public class CoffeeOrder {
+// Now implements IOrder to support DIP
+public class CoffeeOrder implements IOrder {
     private final String beverage;
     private final String size;
     private final List<String> extras;

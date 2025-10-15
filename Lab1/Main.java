@@ -24,7 +24,7 @@ public class Main {
 
         List<String> storedOrders = new ArrayList<>();
 
-        BiConsumer<CoffeeOrder, Double> saveToMemory = (order, total) ->
+        BiConsumer<IOrder, Double> saveToMemory = (order, total) ->
                 storedOrders.add(order.describe() + " Total: $" + String.format("%.2f", total));
 
         Consumer<String> notifyConsole = System.out::println;
