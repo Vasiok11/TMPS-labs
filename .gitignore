@@ -1,3 +1,23 @@
+# Java compiled class files
+*.class
+*.jar
+*.war
+*.ear
+
+# Java build directories
+out/
+bin/
+target/
+build/
+
+# Java IDE files
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

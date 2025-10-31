@@ -5,12 +5,11 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 // Demonstrates OCP: new pricing modifiers can be registered without changing this class.
-// Now implements IPriceCalculator to support DIP
-public class PriceCalculator implements IPriceCalculator {
+public class PriceCalculator {
     private final Map<String, Double> basePrices;
-    private final List<BiFunction<IOrder, Double, Double>> modifiers;
+    private final List<BiFunction<CoffeeOrder, Double, Double>> modifiers;
 
-    public PriceCalculator(Map<String, Double> basePrices, List<BiFunction<IOrder, Double, Double>> modifiers) {
+    public PriceCalculator(Map<String, Double> basePrices, List<BiFunction<CoffeeOrder, Double, Double>> modifiers) {
         this.basePrices = basePrices;
         this.modifiers = new ArrayList<>();
         if (modifiers != null) {
@@ -18,23 +17,23 @@ public class PriceCalculator implements IPriceCalculator {
         }
     }
 
-    public void addModifier(BiFunction<IOrder, Double, Double> modifier) {
+    public void addModifier(BiFunction<CoffeeOrder, Double, Double> modifier) {
         modifiers.add(modifier);
     }
 
-    public double calculate(IOrder order) {
+    public double calculate(CoffeeOrder order) {
         Double startingPrice = basePrices.get(order.getBeverage());
         if (startingPrice == null) {
             throw new IllegalArgumentException("Unknown beverage: " + order.getBeverage());
         }
         double total = startingPrice;
-        for (BiFunction<IOrder, Double, Double> modifier : modifiers) {
+        for (BiFunction<CoffeeOrder, Double, Double> modifier : modifiers) {
             total = modifier.apply(order, total);
         }
         return Math.round(total * 100.0) / 100.0;
     }
 
-    public static double applySizeModifier(IOrder order, Double runningTotal) {
+    public static double applySizeModifier(CoffeeOrder order, Double runningTotal) {
         Map<String, Double> sizeAdjustments = new HashMap<>();
         sizeAdjustments.put("small", 0.0);
         sizeAdjustments.put("medium", 0.5);
@@ -47,7 +46,7 @@ public class PriceCalculator implements IPriceCalculator {
         return runningTotal + adjustment;
     }
 
-    public static double applyExtrasModifier(IOrder order, Double runningTotal) {
+    public static double applyExtrasModifier(CoffeeOrder order, Double runningTotal) {
         Map<String, Double> extrasPrices = new HashMap<>();
         extrasPrices.put("soy", 0.4);
         extrasPrices.put("oat", 0.5);
