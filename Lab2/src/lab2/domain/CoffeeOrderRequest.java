@@ -8,9 +8,7 @@ import java.util.Optional;
 
 import lab2.models.Size;
 
-/**
- * Represents optional customizations requested by a client for a coffee brew.
- */
+// Builder Pattern
 public final class CoffeeOrderRequest {
     private final Size size;
     private final String milkType;

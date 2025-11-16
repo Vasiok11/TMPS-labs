@@ -14,7 +14,6 @@ public class CappuccinoFactory extends RecipeBackedFactory {
 
     @Override
     protected void applySpecialTouch(Coffee.Builder builder, CoffeeOrderRequest request, CoffeeRecipe recipe) {
-        // Upsize cappuccino foam for takeaway to keep it warm longer.
         if (request.takeaway() && request.size().isEmpty()) {
             builder.size(Size.LARGE);
         }

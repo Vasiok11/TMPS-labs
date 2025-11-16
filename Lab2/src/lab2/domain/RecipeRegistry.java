@@ -8,9 +8,7 @@ import lab2.models.CoffeeRecipe;
 import lab2.models.CoffeeType;
 import lab2.models.Size;
 
-/**
- * Singleton registry storing prototype recipes for the core menu.
- */
+// Singleton Pattern
 public final class RecipeRegistry {
     private static final RecipeRegistry INSTANCE = new RecipeRegistry();
 

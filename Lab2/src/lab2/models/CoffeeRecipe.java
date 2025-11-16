@@ -2,10 +2,7 @@ package lab2.models;
 
 import java.util.List;
 
-/**
- * CoffeeRecipe acts as a prototype that can be cloned to quickly produce
- * pre-configured beverages.
- */
+// Prototype Pattern
 public class CoffeeRecipe implements Cloneable {
     private final String name;
     private final Size defaultSize;

@@ -13,7 +13,6 @@ public class LatteFactory extends RecipeBackedFactory {
 
     @Override
     protected void applySpecialTouch(Coffee.Builder builder, CoffeeOrderRequest request, CoffeeRecipe recipe) {
-        // Lattes default to latte art sprinkle when enjoyed in house.
         if (!request.takeaway()) {
             builder.addOn("Latte Art");
         }

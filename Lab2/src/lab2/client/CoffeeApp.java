@@ -5,9 +5,6 @@ import java.util.Scanner;
 
 import lab2.domain.CoffeeOrderRequest;
 import lab2.domain.OrderService;
-import lab2.factory.CappuccinoFactory;
-import lab2.factory.EspressoFactory;
-import lab2.factory.LatteFactory;
 import lab2.models.Coffee;
 import lab2.models.CoffeeType;
 import lab2.models.Size;
@@ -18,9 +15,6 @@ public final class CoffeeApp {
 
     public static void main(String[] args) {
         OrderService orderService = new OrderService();
-        orderService.registerFactory(new EspressoFactory());
-        orderService.registerFactory(new LatteFactory());
-        orderService.registerFactory(new CappuccinoFactory());
 
         try (Scanner scanner = new Scanner(System.in)) {
             scanner.useLocale(Locale.US);

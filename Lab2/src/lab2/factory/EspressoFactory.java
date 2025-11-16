@@ -13,7 +13,6 @@ public class EspressoFactory extends RecipeBackedFactory {
 
     @Override
     protected void applySpecialTouch(Coffee.Builder builder, CoffeeOrderRequest request, CoffeeRecipe recipe) {
-        // Ensure espresso stays intense even if user adds milk later.
         if (request.milkType().isEmpty()) {
             builder.milkType("None");
         }

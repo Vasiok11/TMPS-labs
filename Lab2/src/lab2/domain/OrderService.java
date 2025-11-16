@@ -3,25 +3,27 @@ package lab2.domain;
 import java.util.EnumMap;
 import java.util.Map;
 
-import lab2.factory.CoffeeFactory;
+import lab2.factory.CappuccinoShop;
+import lab2.factory.CoffeeShop;
+import lab2.factory.EspressoShop;
+import lab2.factory.LatteShop;
 import lab2.models.Coffee;
 import lab2.models.CoffeeType;
 
-/**
- * Coordinates coffee orders by delegating instantiation to the registered factories.
- */
 public class OrderService {
-    private final Map<CoffeeType, CoffeeFactory> factories = new EnumMap<>(CoffeeType.class);
+    private final Map<CoffeeType, CoffeeShop> shops = new EnumMap<>(CoffeeType.class);
 
-    public void registerFactory(CoffeeFactory factory) {
-        factories.put(factory.supportedType(), factory);
+    public OrderService() {
+        shops.put(CoffeeType.ESPRESSO, new EspressoShop());
+        shops.put(CoffeeType.LATTE, new LatteShop());
+        shops.put(CoffeeType.CAPPUCCINO, new CappuccinoShop());
     }
 
     public Coffee placeOrder(CoffeeType type, CoffeeOrderRequest request) {
-        CoffeeFactory factory = factories.get(type);
-        if (factory == null) {
-            throw new IllegalArgumentException("No factory registered for type: " + type);
+        CoffeeShop shop = shops.get(type);
+        if (shop == null) {
+            throw new IllegalArgumentException("No shop available for type: " + type);
         }
-        return factory.brewCoffee(request);
+        return shop.orderCoffee(request);
     }
 }

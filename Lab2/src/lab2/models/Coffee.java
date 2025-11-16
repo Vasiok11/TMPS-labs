@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Represents a brewed coffee beverage. Built using the Builder pattern to
- * capture optional customization details in a fluent way.
- */
+// Builder Pattern
 public final class Coffee {
     private final String name;
     private final Size size;
