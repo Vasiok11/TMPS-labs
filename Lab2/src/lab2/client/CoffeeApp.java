@@ -3,6 +3,7 @@ package lab2.client;
 import java.util.Locale;
 import java.util.Scanner;
 
+import lab2.command.OrderManager;
 import lab2.composite.ComboOrder;
 import lab2.composite.OrderComponent;
 import lab2.domain.CoffeeOrderRequest;
@@ -10,9 +11,10 @@ import lab2.facade.CoffeeShopFacade;
 import lab2.models.CoffeeType;
 import lab2.models.Size;
 
+// Behavioral Design Patterns: Observer, Command, Strategy
 public final class CoffeeApp {
-    // Single unified client using Facade Pattern
     private static final CoffeeShopFacade facade = new CoffeeShopFacade();
+    private static String lastOrderId = null;
 
     private CoffeeApp() {
     }
@@ -20,6 +22,15 @@ public final class CoffeeApp {
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
             scanner.useLocale(Locale.US);
+            
+            System.out.print("Welcome! Please enter your name: ");
+            String customerName = scanner.nextLine().trim();
+            if (customerName.isEmpty()) {
+                customerName = "Customer";
+            }
+            facade.setCustomerName(customerName);
+            System.out.println("Hello, " + customerName + "! Let's get you some coffee.\n");
+            
             boolean running = true;
             while (running) {
                 printMainMenu();
@@ -41,6 +52,12 @@ public final class CoffeeApp {
                     case 4:
                         orderCombo(scanner);
                         break;
+                    case 5:
+                        manageOrders(scanner);
+                        break;
+                    case 6:
+                        processPayment(scanner);
+                        break;
                     default:
                         System.out.println("Please choose a valid option.");
                 }
@@ -56,6 +73,8 @@ public final class CoffeeApp {
         System.out.println("2. Order Decorated Coffee (with toppings)");
         System.out.println("3. Order Popular Coffee (preset decorations)");
         System.out.println("4. Order Combo Deal");
+        System.out.println("5. Manage Orders (Command Pattern)");
+        System.out.println("6. Process Payment (Strategy Pattern)");
         System.out.println("0. Exit");
         System.out.print("Select an option: ");
     }
@@ -67,6 +86,9 @@ public final class CoffeeApp {
         CoffeeOrderRequest request = gatherCustomization(scanner);
         OrderComponent order = facade.orderSingleCoffee(type, request);
         facade.printOrderSummary(order);
+        
+        System.out.println("\n--- Placing Order (Command Pattern) ---");
+        lastOrderId = facade.placeOrderWithCommand(order);
     }
 
     private static void orderDecoratedCoffee(Scanner scanner) {
@@ -75,7 +97,6 @@ public final class CoffeeApp {
 
         CoffeeOrderRequest request = gatherCustomization(scanner);
 
-        // Gather decorations
         System.out.print("Add whipped cream? (y/N): ");
         boolean whippedCream = scanner.nextLine().trim().toLowerCase().startsWith("y");
 
@@ -95,6 +116,9 @@ public final class CoffeeApp {
             type, request, whippedCream, extraShot, syrup, caramel
         );
         facade.printOrderSummary(order);
+        
+        System.out.println("\n--- Placing Order (Command Pattern) ---");
+        lastOrderId = facade.placeOrderWithCommand(order);
     }
 
     private static void orderPopularCoffee(Scanner scanner) {
@@ -105,6 +129,9 @@ public final class CoffeeApp {
         OrderComponent order = facade.orderPopularCoffee(type, request);
         System.out.println("\n(Popular preset decorations applied for " + type.getDisplayName() + ")");
         facade.printOrderSummary(order);
+        
+        System.out.println("\n--- Placing Order (Command Pattern) ---");
+        lastOrderId = facade.placeOrderWithCommand(order);
     }
 
     private static void orderCombo(Scanner scanner) {
@@ -145,6 +172,195 @@ public final class CoffeeApp {
         }
 
         facade.printOrderSummary(combo);
+        
+        System.out.println("\n--- Placing Combo Order (Command Pattern) ---");
+        lastOrderId = facade.placeOrderWithCommand(combo);
+    }
+    
+    private static void manageOrders(Scanner scanner) {
+        boolean managing = true;
+        while (managing) {
+            System.out.println("\n=== Order Management (Command Pattern) ===");
+            System.out.println("1. View All Orders");
+            System.out.println("2. Update Order Status");
+            System.out.println("3. Cancel Order");
+            System.out.println("4. Undo Last Action");
+            System.out.println("5. Redo Last Action");
+            System.out.println("6. View Command History");
+            System.out.println("0. Back to Main Menu");
+            System.out.print("Select: ");
+            
+            int choice = readChoice(scanner);
+            switch (choice) {
+                case 0:
+                    managing = false;
+                    break;
+                case 1:
+                    facade.printAllOrders();
+                    break;
+                case 2:
+                    updateOrderStatus(scanner);
+                    break;
+                case 3:
+                    cancelOrder(scanner);
+                    break;
+                case 4:
+                    System.out.println("\n--- Undo (Command Pattern) ---");
+                    facade.undoLastCommand();
+                    break;
+                case 5:
+                    System.out.println("\n--- Redo (Command Pattern) ---");
+                    facade.redoLastCommand();
+                    break;
+                case 6:
+                    facade.printCommandHistory();
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+    
+    private static void updateOrderStatus(Scanner scanner) {
+        System.out.print("Enter Order ID (or press Enter for last order): ");
+        String orderId = scanner.nextLine().trim();
+        if (orderId.isEmpty() && lastOrderId != null) {
+            orderId = lastOrderId;
+        }
+        if (orderId.isEmpty()) {
+            System.out.println("No order ID specified.");
+            return;
+        }
+        
+        System.out.println("Select new status:");
+        System.out.println("1. Preparing");
+        System.out.println("2. Ready");
+        System.out.println("3. Completed");
+        System.out.print("Choice: ");
+        
+        int choice = readChoice(scanner);
+        OrderManager.OrderStatus status;
+        switch (choice) {
+            case 1:
+                status = OrderManager.OrderStatus.PREPARING;
+                break;
+            case 2:
+                status = OrderManager.OrderStatus.READY;
+                break;
+            case 3:
+                status = OrderManager.OrderStatus.COMPLETED;
+                break;
+            default:
+                System.out.println("Invalid status.");
+                return;
+        }
+        
+        facade.updateOrderStatus(orderId, status);
+    }
+    
+    private static void cancelOrder(Scanner scanner) {
+        System.out.print("Enter Order ID to cancel (or press Enter for last order): ");
+        String orderId = scanner.nextLine().trim();
+        if (orderId.isEmpty() && lastOrderId != null) {
+            orderId = lastOrderId;
+        }
+        if (orderId.isEmpty()) {
+            System.out.println("No order ID specified.");
+            return;
+        }
+        
+        facade.cancelOrder(orderId);
+    }
+    
+    private static void processPayment(Scanner scanner) {
+        if (lastOrderId == null) {
+            System.out.println("No order to pay for. Please place an order first.");
+            return;
+        }
+        
+        System.out.println("\n=== Payment (Strategy Pattern) ===");
+        System.out.println("Select payment method:");
+        System.out.println("1. Cash");
+        System.out.println("2. Credit Card");
+        System.out.println("3. Mobile Payment (Apple Pay / Google Pay)");
+        System.out.println("4. Loyalty Points");
+        System.out.print("Choice: ");
+        
+        int choice = readChoice(scanner);
+        
+        // Get order total (we'll use a sample amount)
+        System.out.print("Enter amount to pay: $");
+        String amountStr = scanner.nextLine().trim();
+        double amount;
+        try {
+            amount = Double.parseDouble(amountStr);
+        } catch (NumberFormatException e) {
+            amount = 5.00; // Default
+            System.out.println("Using default amount: $5.00");
+        }
+        
+        switch (choice) {
+            case 1:
+                System.out.print("Enter cash amount: $");
+                String cashStr = scanner.nextLine().trim();
+                double cashAmount;
+                try {
+                    cashAmount = Double.parseDouble(cashStr);
+                } catch (NumberFormatException e) {
+                    cashAmount = amount;
+                }
+                facade.setPaymentCash(cashAmount);
+                break;
+            case 2:
+                System.out.print("Enter card number: ");
+                String cardNumber = scanner.nextLine().trim();
+                if (cardNumber.isEmpty()) cardNumber = "4111111111111111";
+                System.out.print("Enter cardholder name: ");
+                String holderName = scanner.nextLine().trim();
+                if (holderName.isEmpty()) holderName = "John Doe";
+                System.out.print("Enter CVV: ");
+                String cvv = scanner.nextLine().trim();
+                if (cvv.isEmpty()) cvv = "123";
+                System.out.print("Enter expiry (MM/YY): ");
+                String expiry = scanner.nextLine().trim();
+                if (expiry.isEmpty()) expiry = "12/25";
+                facade.setPaymentCreditCard(cardNumber, holderName, cvv, expiry);
+                break;
+            case 3:
+                System.out.print("Enter phone number: ");
+                String phone = scanner.nextLine().trim();
+                if (phone.isEmpty()) phone = "555-1234";
+                System.out.print("Payment app (1=Apple Pay, 2=Google Pay): ");
+                int appChoice = readChoice(scanner);
+                String app = appChoice == 2 ? "Google Pay" : "Apple Pay";
+                facade.setPaymentMobile(phone, app);
+                break;
+            case 4:
+                System.out.print("Enter customer ID: ");
+                String customerId = scanner.nextLine().trim();
+                if (customerId.isEmpty()) customerId = "CUST001";
+                System.out.print("Enter available points: ");
+                String pointsStr = scanner.nextLine().trim();
+                int points;
+                try {
+                    points = Integer.parseInt(pointsStr);
+                } catch (NumberFormatException e) {
+                    points = 1000;
+                }
+                facade.setPaymentLoyaltyPoints(customerId, points);
+                break;
+            default:
+                System.out.println("Invalid choice. Using cash.");
+                facade.setPaymentCash(amount);
+        }
+        
+        boolean success = facade.processPayment(amount);
+        if (success) {
+            System.out.println("Payment successful! Thank you for your order.");
+            facade.updateOrderStatus(lastOrderId, OrderManager.OrderStatus.PREPARING);
+        } else {
+            System.out.println("Payment failed. Please try again.");
+        }
     }
 
     private static CoffeeType selectCoffeeType(Scanner scanner) {
